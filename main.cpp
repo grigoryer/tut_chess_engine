@@ -149,8 +149,15 @@ const U64 not_hg_file= 4557430888798830399ULL;
 //not AB file constant
 U64 not_ab_file = 18229723555195321596ULL;
 
-// pawn attacks table[side][square]
+// pawn attacks table [side][square]
 U64 pawn_attacks[2][64];
+
+//knights attacks table [square]
+U64 knight_attacks[64];
+
+//kings attacks table [square]
+U64 king_attacks[64];
+
 
 // generate pawn attacks
 U64 mask_pawn_attacks(int side, int square){
@@ -165,27 +172,83 @@ U64 mask_pawn_attacks(int side, int square){
     set_bit(bitboard, square);
 
     if(!side){ //white pawns
-        if((bitboard & not_a_file)) attacks |= (bitboard >> 7);
-        if((bitboard & not_h_file)) attacks |= (bitboard >> 9);
+        attacks |= (bitboard & not_h_file) >> 7;
+        attacks |= (bitboard & not_a_file) >> 9;
     }
     else{ //black pawns
-
-        if((bitboard & not_h_file)) attacks |= (bitboard << 7);
-        if((bitboard & not_a_file)) attacks |= (bitboard << 9);
+        attacks |= (bitboard & not_a_file) << 7;
+        attacks |= (bitboard & not_h_file) << 9;
     }
 
     //return attack map
     return attacks;
 }
 
-//init leaper pieces attacks
+//generate knight attacks
+U64 mask_knight_attacks(int square){
+    
+    //result attacks bitboard
+    U64 attacks = 0ULL;
+    
+    // piece bitboard
+    U64 bitboard = 0ULL;
 
+    //set piece on board
+    set_bit(bitboard, square);
+
+    //generate attacks
+    attacks |= (bitboard & not_h_file) >> 15;
+    attacks |= (bitboard & not_a_file) >> 17;
+    attacks |= (bitboard & not_hg_file) >> 6;
+    attacks |= (bitboard & not_ab_file) >> 10;
+
+    attacks |= (bitboard & not_h_file) << 17;
+    attacks |= (bitboard & not_a_file) << 15;
+    attacks |= (bitboard & not_hg_file) << 10;
+    attacks |= (bitboard & not_ab_file) << 6;
+
+    //return attack map
+    return attacks;
+}
+
+//generate king attacks
+U64 mask_king_attacks(int square){
+    //result attacks bitboard
+    U64 attacks = 0ULL;
+    
+    // piece bitboard
+    U64 bitboard = 0ULL;
+
+    //set piece on board
+    set_bit(bitboard, square);
+
+    //generate attacks
+    attacks |= (bitboard & not_a_file) >> 1;
+    attacks |= (bitboard & not_a_file) >> 9;
+    attacks |= (bitboard & not_h_file) >> 7;
+    attacks |= (bitboard >> 8);
+
+    attacks |= (bitboard & not_h_file) << 1;
+    attacks |= (bitboard & not_h_file) << 9;
+    attacks |= (bitboard & not_a_file) << 7;
+    attacks |= (bitboard << 8);
+
+    return attacks;
+}
+
+//init leaper pieces attacks
 void init_leapers_attacks(){
     //loop over 64 boards squares
     for( int square = 0; square < 64; square++){
         //init pawn attacks
         pawn_attacks[white][square] = mask_pawn_attacks(white, square);
         pawn_attacks[black][square] = mask_pawn_attacks(black, square);
+
+        //init kniht attacks
+        knight_attacks[square] = mask_knight_attacks(square);
+
+        //init king attacks
+        king_attacks[square] = mask_king_attacks(square);
     }
 }
 
@@ -201,6 +264,14 @@ void init_leapers_attacks(){
  \*********************************/ 
 
 int main(){
+
+    //print_bitboard(mask_king_attacks(a4));
+
+    init_leapers_attacks();
+
+    for (int square=0; square < 64; square++){
+        print_bitboard(king_attacks[square]);
+    }
 
     return 0;
 }
