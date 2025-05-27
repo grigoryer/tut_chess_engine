@@ -18,6 +18,11 @@ using U64 = unsigned long long;
  #define set_bit(bitboard, square) (bitboard |= (1ULL << square))
  #define pop_bit(bitboard, square) (get_bit(bitboard, square) ? bitboard ^= (1ULL << square) : 0)
 
+ //count bits
+ #define count_bits(bitboard) __builtin_popcountll(bitboard)
+ //get least signigicant 1st bit index
+ #define get_lsb_index(bitboard) __builtin_ctzll(bitboard)
+
  // board squares
  enum{
     a8, b8, c8, d8, e8, f8, g8, h8,
@@ -33,17 +38,16 @@ using U64 = unsigned long long;
  //sides to move (colors)
  enum{white, black};
 
- /*
- "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
- "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
- "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6",
- "a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5",
- "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
- "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
- "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
- "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1",
- 
- */
+ const char *square_to_coordinates[] ={
+    "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
+    "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
+    "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6",
+    "a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5",
+    "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
+    "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
+    "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
+    "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1",
+ };
 
  //print bitboard
  void print_bitboard(U64 bitboard){
@@ -263,7 +267,7 @@ U64 mask_rook_attacks(int square){
     //result attacks bitboard
     U64 attacks = 0ULL;
     
-    // init ranks and files 
+    //init ranks and files 
     int r, f;
 
     //init target ranks and files;
@@ -366,9 +370,6 @@ U64 rook_attacks_on_the_fly(int square, U64 block){
 }
 
 
-
-
-
 //init leaper pieces attacks
 void init_leapers_attacks(){
     //loop over 64 boards squares
@@ -385,7 +386,27 @@ void init_leapers_attacks(){
     }
 }
 
+U64 set_occupancy(int index, int bits_in_mask, U64 attack_mask){
+    //occupancy map
+    U64 occupancy = 0ULL;
 
+    //loop over the range of bits within attack mask
+    for(int count = 0; count < bits_in_mask; count++){
+        // get LS1B index of attack mask
+        int square = get_lsb_index(attack_mask);
+
+        //pop_bit in attack map
+        pop_bit(attack_mask, square);
+
+        //make sure occupancy is on board
+        if(index & (1 << count))
+            //pop occupancy map
+            occupancy |= (1ULL << square);
+
+    }
+    //return occ upancy map
+    return occupancy;
+}
 
 
 
@@ -401,15 +422,18 @@ int main(){
     //initialize leaper pieces attacks
     init_leapers_attacks();
 
-    //init occupancy bitboard
-    U64 block = 0ULL;
-    set_bit(block, d6);
-    set_bit(block, f4);
-    set_bit(block, e3);
-    set_bit(block, b2);
-    print_bitboard(block);
+    //mask piece attacks at given square
+    U64 attack_mask = mask_bishop_attacks(d4);
+
+    //loop over occupancy indicies
+    for(int index = 0; index < 100; index++){
+
+        //init occupancy bitboard
+        print_bitboard(set_occupancy(index, count_bits(attack_mask), attack_mask));
+        getchar();
+    }
     
 
-    print_bitboard(rook_attacks_on_the_fly(d4, block));
+
     return 0;
 }
