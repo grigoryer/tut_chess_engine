@@ -153,6 +153,30 @@ const U64 not_hg_file= 4557430888798830399ULL;
 //not AB file constant
 U64 not_ab_file = 18229723555195321596ULL;
 
+//bishop relevant occupancy bit count for every square on board 
+const int bishop_relevant_bits[64] ={
+    5, 5, 5, 5, 5, 5, 5, 5,
+    5, 5, 7, 7, 7, 7, 5, 5,
+    5, 5, 7, 9, 9, 7, 5, 5,
+    5, 5, 7, 9, 9, 7, 5, 5,
+    5, 5, 7, 7, 7, 7, 5, 5,
+    5, 5, 5, 5, 5, 5, 5, 5,
+    6, 5, 5, 5, 5, 5, 5, 6
+};
+
+//rook relevant occupancy bit count for every square on board 
+const int rook_relevant_bits[64] = {
+    12, 11, 11, 11, 11, 11, 11, 12,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    12, 11, 11, 11, 11, 11, 11, 12
+};
+
+
 // pawn attacks table [side][square]
 U64 pawn_attacks[2][64];
 
@@ -417,23 +441,57 @@ U64 set_occupancy(int index, int bits_in_mask, U64 attack_mask){
  ==================================
  \*********************************/ 
 
+ //psuedo random number state
+unsigned int state = 1804289383;
+
+// gen 32-bit psudo legal numbers
+unsigned int get_random_U32number(){
+    // get current state
+    unsigned int number = state;
+
+    //XOR shift algorithm
+    number ^= number << 13;
+    number ^= number >> 17;
+    number ^= number << 5;
+
+    //upadte rnadom number state
+    state = number;
+    
+    //return random number
+
+    return state;
+}
+
+//generate 64 bit pseudo legal numbers function
+
+U64 get_random_U64number(){
+    //define 4 random numbers
+
+    U64 n1, n2, n3, n4;
+
+    n1 = (U64)get_random_U32number() & 0xFFFF;
+    n2 = (U64)get_random_U32number() & 0xFFFF;
+    n3 = (U64)get_random_U32number() & 0xFFFF;
+    n4 = (U64)get_random_U32number() & 0xFFFF;
+
+    return n1 | (n2 << 16) | (n3 << 32) | (n4 << 48);
+}
+
+//generate magic number candidate
+U64 generate_magic_number(){
+    return get_random_U64number() & get_random_U64number() & get_random_U64number();
+}
+
 int main(){
 
     //initialize leaper pieces attacks
     init_leapers_attacks();
 
-    //mask piece attacks at given square
-    U64 attack_mask = mask_bishop_attacks(d4);
-
-    //loop over occupancy indicies
-    for(int index = 0; index < 100; index++){
-
-        //init occupancy bitboard
-        print_bitboard(set_occupancy(index, count_bits(attack_mask), attack_mask));
-        getchar();
-    }
-    
-
+    print_bitboard((U64)get_random_U32number());
+    print_bitboard((U64)(get_random_U32number() & 0xFFFF)); //slice upper (from MS1b side) 16 bits
+    print_bitboard(get_random_U64number());
+    print_bitboard(generate_magic_number());
 
     return 0;
+
 }
