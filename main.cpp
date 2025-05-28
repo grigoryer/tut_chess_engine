@@ -3,7 +3,7 @@
 #include <string.h>
 
 using std::cout;
-using U64 = unsigned long long;
+#define U64 unsigned long long
 
 
 /*********************************\ 
@@ -158,7 +158,8 @@ const U64 not_hg_file= 4557430888798830399ULL;
 U64 not_ab_file = 18229723555195321596ULL;
 
 //bishop relevant occupancy bit count for every square on board 
-const int bishop_relevant_bits[64] ={
+const int bishop_relevant_bits[64] = {
+    6, 5, 5, 5, 5, 5, 5, 6, 
     5, 5, 5, 5, 5, 5, 5, 5,
     5, 5, 7, 7, 7, 7, 5, 5,
     5, 5, 7, 9, 9, 7, 5, 5,
@@ -182,138 +183,138 @@ const int rook_relevant_bits[64] = {
 
 // rook magic numbers
 U64 rook_magic_numbers[64] = {
-    0x2000380201000008ULL,
-    0x9002041009000030ULL,
-    0x1000430100100082ULL,
-    0x808008040002020ULL,
-    0x801a0105000424ULL,
-    0x12000018200000a0ULL,
-    0x2000020800220040ULL,
-    0x40801910d4004ULL,
-    0x1020210000040180ULL,
-    0x1915500080810013ULL,
-    0x2800000882600ULL,
-    0x28140010110aULL,
-    0xc0018c1000262001ULL,
-    0xa001000200060ULL,
-    0xc00000e00a000500ULL,
-    0x4050008210040800ULL,
-    0x25c080804200101ULL,
-    0x14a0000c00001004ULL,
-    0x202008011001182ULL,
-    0x88d288c004000ULL,
-    0xa520042000120000ULL,
-    0x80280304a109080ULL,
-    0x841801400120030ULL,
-    0x800080000100001ULL,
-    0x3200a40580200001ULL,
-    0x400020500c00200ULL,
-    0x2020020410000010ULL,
-    0x1000082400000400ULL,
-    0x800402808004000ULL,
-    0x40000300a102020ULL,
-    0x80042002904000ULL,
-    0x181080480000041ULL,
-    0x540004900470302ULL,
-    0x2019004000c382ULL,
-    0x1040010001880800ULL,
-    0x9000200289008000ULL,
-    0x131042080000150ULL,
-    0x220800040c04800ULL,
-    0x8c02100001200ULL,
-    0x2022188000040120ULL,
-    0x20020891201800ULL,
-    0x608022088440411ULL,
-    0x8061840001108005ULL,
-    0x870001a040ULL,
-    0x7000000009018ULL,
-    0x1001064a2250000ULL,
-    0x2000820300180020ULL,
-    0x2040c09000060020ULL,
-    0x2008000004069210ULL,
-    0x8b08001220009ULL,
-    0x400032040004ULL,
-    0x20006200040280c0ULL,
-    0x20004403000010ULL,
-    0x8000c001020c0001ULL,
-    0x12040810902240ULL,
-    0x400c802211420200ULL,
-    0x1a10004004004ULL,
-    0xa09540042500000ULL,
-    0x540008008069ULL,
-    0x1080c804200ULL,
-    0xa000081241180380ULL,
-    0x800880000402445ULL,
-    0x8040035200202040ULL,
-    0x400080002440020ULL
+    0x8a80104000800020ULL,
+    0x140002000100040ULL,
+    0x2801880a0017001ULL,
+    0x100081001000420ULL,
+    0x200020010080420ULL,
+    0x3001c0002010008ULL,
+    0x8480008002000100ULL,
+    0x2080088004402900ULL,
+    0x800098204000ULL,
+    0x2024401000200040ULL,
+    0x100802000801000ULL,
+    0x120800800801000ULL,
+    0x208808088000400ULL,
+    0x2802200800400ULL,
+    0x2200800100020080ULL,
+    0x801000060821100ULL,
+    0x80044006422000ULL,
+    0x100808020004000ULL,
+    0x12108a0010204200ULL,
+    0x140848010000802ULL,
+    0x481828014002800ULL,
+    0x8094004002004100ULL,
+    0x4010040010010802ULL,
+    0x20008806104ULL,
+    0x100400080208000ULL,
+    0x2040002120081000ULL,
+    0x21200680100081ULL,
+    0x20100080080080ULL,
+    0x2000a00200410ULL,
+    0x20080800400ULL,
+    0x80088400100102ULL,
+    0x80004600042881ULL,
+    0x4040008040800020ULL,
+    0x440003000200801ULL,
+    0x4200011004500ULL,
+    0x188020010100100ULL,
+    0x14800401802800ULL,
+    0x2080040080800200ULL,
+    0x124080204001001ULL,
+    0x200046502000484ULL,
+    0x480400080088020ULL,
+    0x1000422010034000ULL,
+    0x30200100110040ULL,
+    0x100021010009ULL,
+    0x2002080100110004ULL,
+    0x202008004008002ULL,
+    0x20020004010100ULL,
+    0x2048440040820001ULL,
+    0x101002200408200ULL,
+    0x40802000401080ULL,
+    0x4008142004410100ULL,
+    0x2060820c0120200ULL,
+    0x1001004080100ULL,
+    0x20c020080040080ULL,
+    0x2935610830022400ULL,
+    0x44440041009200ULL,
+    0x280001040802101ULL,
+    0x2100190040002085ULL,
+    0x80c0084100102001ULL,
+    0x4024081001000421ULL,
+    0x20030a0244872ULL,
+    0x12001008414402ULL,
+    0x2006104900a0804ULL,
+    0x1004081002402ULL
 };
 
 //bishop magic numbers
 U64 bishop_magic_numbers[64] = {
-    0x8000900140840092ULL,
-    0x804840004c900ULL,
-    0x4018a4000100200ULL,
-    0x2008028800020000ULL,
-    0x4003108c18304c34ULL,
-    0x2c08401405280000ULL,
-    0x100780600010ULL,
-    0xc408004a001040ULL,
-    0x800420008018010ULL,
-    0x1800012898000018ULL,
-    0x62040981c0001032ULL,
-    0x102120030402100ULL,
-    0x10182840048180ULL,
-    0x50405800000840ULL,
-    0x4300085008ULL,
-    0x11008402150a0200ULL,
-    0x840011004044280ULL,
-    0x704840810202ULL,
-    0x8000020e080001ULL,
-    0x8808008200808401ULL,
-    0x44c20212800000ULL,
-    0x18000d090041800ULL,
-    0x10e020504211200ULL,
-    0x200021018440400ULL,
-    0xaa0001210064048ULL,
-    0x241102000008124ULL,
-    0x100002c12180204ULL,
-    0x880200102070ULL,
-    0x40200052008011ULL,
-    0x430000d0ULL,
-    0x8024c0005408060fULL,
-    0x400002000c50060ULL,
-    0x422008180c1020ULL,
-    0x2308102a00414400ULL,
-    0x2000082020004206ULL,
-    0x8004000c2024090ULL,
-    0x6006501801ULL,
-    0x88880004685010ULL,
-    0x10000802040003c0ULL,
-    0x1010430800024000ULL,
-    0x410041240190800ULL,
-    0x1804000b00810100ULL,
-    0x800002808000284ULL,
-    0x648041000ULL,
-    0x80010802081044ULL,
-    0x8080024009001042ULL,
-    0x3000dc020500020ULL,
-    0x80042000e00004ULL,
-    0x220802468032200ULL,
-    0x10858020080a0ULL,
-    0x2080604201818000ULL,
-    0x8002100214000ULL,
-    0x8040000821802000ULL,
-    0xa0001200000c020ULL,
-    0x100090004e800ULL,
-    0x28890000282040ULL,
-    0x40502920100000ULL,
-    0x8020293001200840ULL,
-    0x2605400040003000ULL,
-    0x2200002002800446ULL,
-    0x200806200a008ULL,
-    0x801400600042100ULL,
-    0x2900290080208400ULL,
-    0x5000020058ULL
+    0x40040844404084ULL,
+    0x2004208a004208ULL,
+    0x10190041080202ULL,
+    0x108060845042010ULL,
+    0x581104180800210ULL,
+    0x2112080446200010ULL,
+    0x1080820820060210ULL,
+    0x3c0808410220200ULL,
+    0x4050404440404ULL,
+    0x21001420088ULL,
+    0x24d0080801082102ULL,
+    0x1020a0a020400ULL,
+    0x40308200402ULL,
+    0x4011002100800ULL,
+    0x401484104104005ULL,
+    0x801010402020200ULL,
+    0x400210c3880100ULL,
+    0x404022024108200ULL,
+    0x810018200204102ULL,
+    0x4002801a02003ULL,
+    0x85040820080400ULL,
+    0x810102c808880400ULL,
+    0xe900410884800ULL,
+    0x8002020480840102ULL,
+    0x220200865090201ULL,
+    0x2010100a02021202ULL,
+    0x152048408022401ULL,
+    0x20080002081110ULL,
+    0x4001001021004000ULL,
+    0x800040400a011002ULL,
+    0xe4004081011002ULL,
+    0x1c004001012080ULL,
+    0x8004200962a00220ULL,
+    0x8422100208500202ULL,
+    0x2000402200300c08ULL,
+    0x8646020080080080ULL,
+    0x80020a0200100808ULL,
+    0x2010004880111000ULL,
+    0x623000a080011400ULL,
+    0x42008c0340209202ULL,
+    0x209188240001000ULL,
+    0x400408a884001800ULL,
+    0x110400a6080400ULL,
+    0x1840060a44020800ULL,
+    0x90080104000041ULL,
+    0x201011000808101ULL,
+    0x1a2208080504f080ULL,
+    0x8012020600211212ULL,
+    0x500861011240000ULL,
+    0x180806108200800ULL,
+    0x4000020e01040044ULL,
+    0x300000261044000aULL,
+    0x802241102020002ULL,
+    0x20906061210001ULL,
+    0x5a84841004010310ULL,
+    0x4010801011c04ULL,
+    0xa010109502200ULL,
+    0x4a02012000ULL,
+    0x500201010098b028ULL,
+    0x8040002811040900ULL,
+    0x28000010020204ULL,
+    0x6000020202d0240ULL,
+    0x8918844842082200ULL,
+    0x4010011029020020ULL
 };
 
 // pawn attacks table [side][square]
@@ -324,6 +325,18 @@ U64 knight_attacks[64];
 
 //kings attacks table [square]
 U64 king_attacks[64];
+
+//bishop attack masks
+U64 bishop_masks[64];
+
+//rook attack masks
+U64 rook_masks[64];
+
+//bishop attacks table [squares][occupanices]
+U64 bishop_attacks[64][512];
+
+/// rook attacks table [square] [occupancies]
+U64 rook_attacks[64][4096];
 
 // generate pawn attacks
 U64 mask_pawn_attacks(int side, int square){
@@ -685,28 +698,96 @@ U64 generate_magic_number(){
     return 0ULL;
  }
 
-//init magic numbers
-
-
-
-void init_magic_numbers(){
-    //loop over 64 board squares
-
-    for(int square = 0; square < 64; square++){
-        //init rookmagic numbers
-        //printf(" 0x%llxULL\n", find_magic_number(square, rook_relevant_bits[square], rook));
+// init magic numbers
+void init_magic_numbers()
+{
+    // loop over 64 board squares
+    for (int square = 0; square < 64; square++)
+        // init rook magic numbers
         rook_magic_numbers[square] = find_magic_number(square, rook_relevant_bits[square], rook);
-    }
 
-    std::cout <<  "\n\n\n";
-
-    for(int square = 0; square < 64; square++){
-        //init rookmagic numbers
-        //printf(" 0x%llxULL\n", find_magic_number(square, bishop_relevant_bits[square], bishop));
+    // loop over 64 board squares
+    for (int square = 0; square < 64; square++)
+        // init bishop magic numbers
         bishop_magic_numbers[square] = find_magic_number(square, bishop_relevant_bits[square], bishop);
+}
+
+
+// init slider piece's attack tables
+void init_sliders_attacks(int bishop)
+{
+    // loop over 64 board squares
+    for (int square = 0; square < 64; square++)
+    {
+        // init bishop & rook masks
+        bishop_masks[square] = mask_bishop_attacks(square);
+        rook_masks[square] = mask_rook_attacks(square);
+        
+        // init current mask
+        U64 attack_mask = bishop ? bishop_masks[square] : rook_masks[square];
+        
+        // init relevant occupancy bit count
+        int relevant_bits_count = count_bits(attack_mask);
+        
+        // init occupancy indicies
+        int occupancy_indicies = (1 << relevant_bits_count);
+        
+        // loop over occupancy indicies
+        for (int index = 0; index < occupancy_indicies; index++)
+        {
+            // bishop
+            if (bishop)
+            {
+                // init current occupancy variation
+                U64 occupancy = set_occupancy(index, relevant_bits_count, attack_mask);
+                
+                // init magic index
+                int magic_index = (occupancy * bishop_magic_numbers[square]) >> (64 - bishop_relevant_bits[square]);
+                
+                // init bishop attacks
+                bishop_attacks[square][magic_index] = bishop_attacks_on_the_fly(square, occupancy);
+            }
+            
+            // rook
+            else
+            {
+                // init current occupancy variation
+                U64 occupancy = set_occupancy(index, relevant_bits_count, attack_mask);
+                
+                // init magic index
+                int magic_index = (occupancy * rook_magic_numbers[square]) >> (64 - rook_relevant_bits[square]);
+                
+                // init bishop attacks
+                rook_attacks[square][magic_index] = rook_attacks_on_the_fly(square, occupancy);
+            
+            }
+        }
     }
 }
 
+// get bishop attacks
+static inline U64 get_bishop_attacks(int square, U64 occupancy)
+{
+    // get bishop attacks assuming current board occupancy
+    occupancy &= bishop_masks[square];
+    occupancy *= bishop_magic_numbers[square];
+    occupancy >>= 64 - bishop_relevant_bits[square];
+
+    // return bishop attacks
+    return bishop_attacks[square][occupancy];
+}
+
+// get rook attacks
+static inline U64 get_rook_attacks(int square, U64 occupancy)
+{
+    // get bishop attacks assuming current board occupancy
+    occupancy &= rook_masks[square];
+    occupancy *= rook_magic_numbers[square];
+    occupancy >>= 64 - rook_relevant_bits[square];
+
+    // return rook attacks
+    return rook_attacks[square][occupancy];
+}
 /*********************************\ 
  
         init all
@@ -718,11 +799,14 @@ void init_magic_numbers(){
 
  void init_all(){
 
-    init_leapers_attacks();
-
     //init magic nubmers
     //init_magic_numbers();
 
+    init_leapers_attacks();
+
+    // init slider pieces attacks
+    init_sliders_attacks(bishop);
+    init_sliders_attacks(rook);
  }
 
 
@@ -736,6 +820,28 @@ void init_magic_numbers(){
 int main(){
     //init all
     init_all();
+
+    //define test bitboard
+
+    U64 occupancy = 0ULL;
+
+    // set blocker pieces on board
+    set_bit(occupancy, c5);
+    set_bit(occupancy, f2);
+    set_bit(occupancy, g7);
+    set_bit(occupancy, b2);
+    set_bit(occupancy, g5);
+    set_bit(occupancy, e2);
+    set_bit(occupancy, e7);
+    
+    // print occupancies
+    print_bitboard(occupancy);
+    
+    // print rook attacks
+    print_bitboard(get_rook_attacks(e5, occupancy));
+    
+    // print bishop attacks
+    print_bitboard(get_bishop_attacks(d4, occupancy));
 
     return 0;
 
