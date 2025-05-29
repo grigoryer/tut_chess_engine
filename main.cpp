@@ -6,6 +6,13 @@ using std::cout;
 #define U64 unsigned long long
 
 
+#define empty_board "8/8/8/8/8/8/8/8 w - - "
+#define start_position "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 "
+#define tricky_position "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1 "
+#define killer_position "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1"
+#define cmk_position "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 9 "
+
+
 /*********************************\ 
  
          Bit manipulations
@@ -121,7 +128,7 @@ using std::cout;
 U64 bitboards[12];
 
  //define occuapny bitboard
-U64 occupancy[3];
+U64 occupancies[3];
 
 //side to move
 int side;
@@ -163,9 +170,128 @@ void print_board(){
     printf("\n   a b c d e f g h\n\n");
     //side to mvoe
     printf("Side: %s\n", (!side ? "White" : "Black"));
-    //print enpassant
-    //printf("Enpas: %s\n", (enpassant != no_sq) ? square_to_coordinates[enpassant] : "none");
+
+    printf("Enpassant:   %s\n", (enpassant != no_sq) ? square_to_coordinates[enpassant] : "no");
+    
+    // print castling rights
+    printf("Castling:  %c%c%c%c\n\n", (castle & wk) ? 'K' : '-',
+                                           (castle & wq) ? 'Q' : '-',
+                                           (castle & bk) ? 'k' : '-',
+                                           (castle & bq) ? 'q' : '-');
 }
+
+
+
+//parse FEN
+
+void parse_fen(const char *fen){
+
+    //reset board position
+    memset(bitboards, 0ULL, sizeof(bitboards));
+
+    //reset occupancies
+    memset(occupancies, 0ULL, sizeof(occupancies));
+
+    //reset game state variables
+    side = 0;
+    enpassant = no_sq;
+    castle = 0;
+
+    for(int rank = 0; rank < 8; rank++){
+        for(int file = 0; file < 8; file++){
+            int square =rank * 8 + file;
+
+            if((*fen >= 'a' && *fen <= 'z') || *fen >='A' && *fen <= 'Z'){
+                int piece = char_pieces[*fen];
+
+                //set piece on corresponding bitboard
+                set_bit(bitboards[piece], square);
+
+                fen++;
+            }
+            //match empty squares
+            if(*fen >= '0' && *fen <= '9'){
+
+                //convert char to int
+                int offset = *fen - '0';
+
+                int piece = -1;
+
+                //loop over all piece bitboards
+
+                for(int bb_piece = P; bb_piece <= k; bb_piece++){
+                    if(get_bit(bitboards[bb_piece], square)){
+                        piece = bb_piece;
+                    }
+                }
+                //if no piece on current square
+                if(piece == -1)
+                    file--;
+
+                //adjust file counter
+                file += offset;
+
+                fen++;
+            }
+
+            if(*fen == '/')
+                fen++;
+        }
+    }
+    fen++;
+
+    //side
+    (*fen == 'w') ? (side = white) : (side = black);
+
+    //casteling rights
+    fen += 2;
+
+    while (*fen != ' '){
+        switch(*fen){
+            case 'K': castle |= wk; break;
+            case 'Q': castle |= wq; break;
+            case 'k': castle |= bk; break;
+            case 'q': castle |= bq; break;
+            case '-': break;
+        }
+        fen++;
+    }
+
+    //parse en passant square
+    fen++;
+    if(*fen != '-'){
+        //parse enpassant file & rank
+        int file = fen[0] - 'a';
+        int rank = 8 - (fen[1] - '0');
+
+        //init enpassant square
+
+        enpassant = rank * 8 + file;
+    }else{
+        enpassant = no_sq;
+    }
+
+
+    //init occupancies
+    //white
+    for(int piece = P; piece <= K; piece++){
+        occupancies[white] |= bitboards[piece];
+    }
+
+    //black
+    for(int piece = p; piece <= k; piece++){
+        occupancies[black] |= bitboards[piece];
+    }
+
+    //both
+    occupancies[both] |= occupancies[white] | occupancies[black];
+}   
+
+
+
+
+
+
 
 
 
@@ -272,138 +398,138 @@ const int rook_relevant_bits[64] = {
 
 // rook magic numbers
 U64 rook_magic_numbers[64] = {
-    0x2000380201000008ULL,
-    0x9002041009000030ULL,
-    0x1000430100100082ULL,
-    0x808008040002020ULL,
-    0x801a0105000424ULL,
-    0x12000018200000a0ULL,
-    0x2000020800220040ULL,
-    0x40801910d4004ULL,
-    0x1020210000040180ULL,
-    0x1915500080810013ULL,
-    0x2800000882600ULL,
-    0x28140010110aULL,
-    0xc0018c1000262001ULL,
-    0xa001000200060ULL,
-    0xc00000e00a000500ULL,
-    0x4050008210040800ULL,
-    0x25c080804200101ULL,
-    0x14a0000c00001004ULL,
-    0x202008011001182ULL,
-    0x88d288c004000ULL,
-    0xa520042000120000ULL,
-    0x80280304a109080ULL,
-    0x841801400120030ULL,
-    0x800080000100001ULL,
-    0x3200a40580200001ULL,
-    0x400020500c00200ULL,
-    0x2020020410000010ULL,
-    0x1000082400000400ULL,
-    0x800402808004000ULL,
-    0x40000300a102020ULL,
-    0x80042002904000ULL,
-    0x181080480000041ULL,
-    0x540004900470302ULL,
-    0x2019004000c382ULL,
-    0x1040010001880800ULL,
-    0x9000200289008000ULL,
-    0x131042080000150ULL,
-    0x220800040c04800ULL,
-    0x8c02100001200ULL,
-    0x2022188000040120ULL,
-    0x20020891201800ULL,
-    0x608022088440411ULL,
-    0x8061840001108005ULL,
-    0x870001a040ULL,
-    0x7000000009018ULL,
-    0x1001064a2250000ULL,
-    0x2000820300180020ULL,
-    0x2040c09000060020ULL,
-    0x2008000004069210ULL,
-    0x8b08001220009ULL,
-    0x400032040004ULL,
-    0x20006200040280c0ULL,
-    0x20004403000010ULL,
-    0x8000c001020c0001ULL,
-    0x12040810902240ULL,
-    0x400c802211420200ULL,
-    0x1a10004004004ULL,
-    0xa09540042500000ULL,
-    0x540008008069ULL,
-    0x1080c804200ULL,
-    0xa000081241180380ULL,
-    0x800880000402445ULL,
-    0x8040035200202040ULL,
-    0x400080002440020ULL
+    0x8a80104000800020ULL,
+    0x140002000100040ULL,
+    0x2801880a0017001ULL,
+    0x100081001000420ULL,
+    0x200020010080420ULL,
+    0x3001c0002010008ULL,
+    0x8480008002000100ULL,
+    0x2080088004402900ULL,
+    0x800098204000ULL,
+    0x2024401000200040ULL,
+    0x100802000801000ULL,
+    0x120800800801000ULL,
+    0x208808088000400ULL,
+    0x2802200800400ULL,
+    0x2200800100020080ULL,
+    0x801000060821100ULL,
+    0x80044006422000ULL,
+    0x100808020004000ULL,
+    0x12108a0010204200ULL,
+    0x140848010000802ULL,
+    0x481828014002800ULL,
+    0x8094004002004100ULL,
+    0x4010040010010802ULL,
+    0x20008806104ULL,
+    0x100400080208000ULL,
+    0x2040002120081000ULL,
+    0x21200680100081ULL,
+    0x20100080080080ULL,
+    0x2000a00200410ULL,
+    0x20080800400ULL,
+    0x80088400100102ULL,
+    0x80004600042881ULL,
+    0x4040008040800020ULL,
+    0x440003000200801ULL,
+    0x4200011004500ULL,
+    0x188020010100100ULL,
+    0x14800401802800ULL,
+    0x2080040080800200ULL,
+    0x124080204001001ULL,
+    0x200046502000484ULL,
+    0x480400080088020ULL,
+    0x1000422010034000ULL,
+    0x30200100110040ULL,
+    0x100021010009ULL,
+    0x2002080100110004ULL,
+    0x202008004008002ULL,
+    0x20020004010100ULL,
+    0x2048440040820001ULL,
+    0x101002200408200ULL,
+    0x40802000401080ULL,
+    0x4008142004410100ULL,
+    0x2060820c0120200ULL,
+    0x1001004080100ULL,
+    0x20c020080040080ULL,
+    0x2935610830022400ULL,
+    0x44440041009200ULL,
+    0x280001040802101ULL,
+    0x2100190040002085ULL,
+    0x80c0084100102001ULL,
+    0x4024081001000421ULL,
+    0x20030a0244872ULL,
+    0x12001008414402ULL,
+    0x2006104900a0804ULL,
+    0x1004081002402ULL
 };
 
 //bishop magic numbers
 U64 bishop_magic_numbers[64] = {
-    0x8000900140840092ULL,
-    0x804840004c900ULL,
-    0x4018a4000100200ULL,
-    0x2008028800020000ULL,
-    0x4003108c18304c34ULL,
-    0x2c08401405280000ULL,
-    0x100780600010ULL,
-    0xc408004a001040ULL,
-    0x800420008018010ULL,
-    0x1800012898000018ULL,
-    0x62040981c0001032ULL,
-    0x102120030402100ULL,
-    0x10182840048180ULL,
-    0x50405800000840ULL,
-    0x4300085008ULL,
-    0x11008402150a0200ULL,
-    0x840011004044280ULL,
-    0x704840810202ULL,
-    0x8000020e080001ULL,
-    0x8808008200808401ULL,
-    0x44c20212800000ULL,
-    0x18000d090041800ULL,
-    0x10e020504211200ULL,
-    0x200021018440400ULL,
-    0xaa0001210064048ULL,
-    0x241102000008124ULL,
-    0x100002c12180204ULL,
-    0x880200102070ULL,
-    0x40200052008011ULL,
-    0x430000d0ULL,
-    0x8024c0005408060fULL,
-    0x400002000c50060ULL,
-    0x422008180c1020ULL,
-    0x2308102a00414400ULL,
-    0x2000082020004206ULL,
-    0x8004000c2024090ULL,
-    0x6006501801ULL,
-    0x88880004685010ULL,
-    0x10000802040003c0ULL,
-    0x1010430800024000ULL,
-    0x410041240190800ULL,
-    0x1804000b00810100ULL,
-    0x800002808000284ULL,
-    0x648041000ULL,
-    0x80010802081044ULL,
-    0x8080024009001042ULL,
-    0x3000dc020500020ULL,
-    0x80042000e00004ULL,
-    0x220802468032200ULL,
-    0x10858020080a0ULL,
-    0x2080604201818000ULL,
-    0x8002100214000ULL,
-    0x8040000821802000ULL,
-    0xa0001200000c020ULL,
-    0x100090004e800ULL,
-    0x28890000282040ULL,
-    0x40502920100000ULL,
-    0x8020293001200840ULL,
-    0x2605400040003000ULL,
-    0x2200002002800446ULL,
-    0x200806200a008ULL,
-    0x801400600042100ULL,
-    0x2900290080208400ULL,
-    0x5000020058ULL
+    0x40040844404084ULL,
+    0x2004208a004208ULL,
+    0x10190041080202ULL,
+    0x108060845042010ULL,
+    0x581104180800210ULL,
+    0x2112080446200010ULL,
+    0x1080820820060210ULL,
+    0x3c0808410220200ULL,
+    0x4050404440404ULL,
+    0x21001420088ULL,
+    0x24d0080801082102ULL,
+    0x1020a0a020400ULL,
+    0x40308200402ULL,
+    0x4011002100800ULL,
+    0x401484104104005ULL,
+    0x801010402020200ULL,
+    0x400210c3880100ULL,
+    0x404022024108200ULL,
+    0x810018200204102ULL,
+    0x4002801a02003ULL,
+    0x85040820080400ULL,
+    0x810102c808880400ULL,
+    0xe900410884800ULL,
+    0x8002020480840102ULL,
+    0x220200865090201ULL,
+    0x2010100a02021202ULL,
+    0x152048408022401ULL,
+    0x20080002081110ULL,
+    0x4001001021004000ULL,
+    0x800040400a011002ULL,
+    0xe4004081011002ULL,
+    0x1c004001012080ULL,
+    0x8004200962a00220ULL,
+    0x8422100208500202ULL,
+    0x2000402200300c08ULL,
+    0x8646020080080080ULL,
+    0x80020a0200100808ULL,
+    0x2010004880111000ULL,
+    0x623000a080011400ULL,
+    0x42008c0340209202ULL,
+    0x209188240001000ULL,
+    0x400408a884001800ULL,
+    0x110400a6080400ULL,
+    0x1840060a44020800ULL,
+    0x90080104000041ULL,
+    0x201011000808101ULL,
+    0x1a2208080504f080ULL,
+    0x8012020600211212ULL,
+    0x500861011240000ULL,
+    0x180806108200800ULL,
+    0x4000020e01040044ULL,
+    0x300000261044000aULL,
+    0x802241102020002ULL,
+    0x20906061210001ULL,
+    0x5a84841004010310ULL,
+    0x4010801011c04ULL,
+    0xa010109502200ULL,
+    0x4a02012000ULL,
+    0x500201010098b028ULL,
+    0x8040002811040900ULL,
+    0x28000010020204ULL,
+    0x6000020202d0240ULL,
+    0x8918844842082200ULL,
+    0x4010011029020020ULL
 };
 
 // pawn attacks table [side][square]
@@ -516,12 +642,11 @@ U64 mask_bishop_attacks(int square){
     int tr = square / 8;
     int tf = square % 8;
 
-    //mask bishiop occupancy bits
-
-    for(r = tr + 1, f = tf + 1; r <= 6 && f <= 6; r++, f++) attacks |= (1ULL << (r * 8 + f));
-    for(r = tr - 1, f = tf + 1; r >= 1 && f <= 6; r--, f++) attacks |= (1ULL << (r * 8 + f));
-    for(r = tr + 1, f = tf - 1; r <= 6 && f >= 1; r++, f--) attacks |= (1ULL << (r * 8 + f));
-    for(r = tr - 1, f = tf - 1; r >= 1 && f >= 1; r--, f--) attacks |= (1ULL << (r * 8 + f));
+    // mask relevant bishop occupancy bits
+    for (r = tr + 1, f = tf + 1; r <= 6 && f <= 6; r++, f++) attacks |= (1ULL << (r * 8 + f));
+    for (r = tr - 1, f = tf + 1; r >= 1 && f <= 6; r--, f++) attacks |= (1ULL << (r * 8 + f));
+    for (r = tr + 1, f = tf - 1; r <= 6 && f >= 1; r++, f--) attacks |= (1ULL << (r * 8 + f));
+    for (r = tr - 1, f = tf - 1; r >= 1 && f >= 1; r--, f--) attacks |= (1ULL << (r * 8 + f));
 
     return attacks;
 }
@@ -538,11 +663,11 @@ U64 mask_rook_attacks(int square){
     int tr = square / 8;
     int tf = square % 8;
 
-    //mask rook occupancy bits
-    for(r = tr + 1; r <= 6; r++) attacks |= (1ULL << (r * 8 + tf));
-    for(r = tr - 1; r >= 1; r--) attacks |= (1ULL << (r * 8 + tf));
-    for(f = tf + 1; f <= 6; f++) attacks |= (1ULL << (tr * 8 + f));
-    for(f = tf - 1; f >= 1; f--) attacks |= (1ULL << (tr * 8 + f));
+    // mask relevant rook occupancy bits
+    for (r = tr + 1; r <= 6; r++) attacks |= (1ULL << (r * 8 + tf));
+    for (r = tr - 1; r >= 1; r--) attacks |= (1ULL << (r * 8 + tf));
+    for (f = tf + 1; f <= 6; f++) attacks |= (1ULL << (tr * 8 + f));
+    for (f = tf - 1; f >= 1; f--) attacks |= (1ULL << (tr * 8 + f));
 
     return attacks;
 }
@@ -877,6 +1002,38 @@ static inline U64 get_rook_attacks(int square, U64 occupancy)
     // return rook attacks
     return rook_attacks[square][occupancy];
 }
+
+
+static inline U64 get_queen_attacks(int square, U64 occupancy)
+{
+
+    //init result attacks
+
+    U64 queen_attacks = 0ULL;
+
+    U64 bishop_occupancy = occupancy;
+    U64 rook_occupancy = occupancy;
+
+    //bisop attacks assuming board occupancy 
+    bishop_occupancy &= bishop_masks[square];
+    bishop_occupancy *= bishop_magic_numbers[square];
+    bishop_occupancy >>= 64 - bishop_relevant_bits[square];
+
+    queen_attacks = bishop_attacks[square][bishop_occupancy];
+
+    // get rook attacks assuming current board occupancy
+    rook_occupancy &= rook_masks[square];
+    rook_occupancy *= rook_magic_numbers[square];
+    rook_occupancy >>= 64 - rook_relevant_bits[square];
+
+    queen_attacks |= rook_attacks[square][rook_occupancy];
+
+    // return queen attacks
+    return queen_attacks;
+}
+
+
+
 /*********************************\ 
  
         init all
@@ -898,6 +1055,52 @@ static inline U64 get_rook_attacks(int square, U64 occupancy)
     init_sliders_attacks(rook);
  }
 
+//is square attacked?!
+
+static inline int is_square_attacked(int square, int side){
+
+    //squqres attacked by white pawn
+    if((side == white) && (pawn_attacks[black][square] & bitboards[P])) return 1;
+    //squqres attacked by black pawn
+    if((side == black) && (pawn_attacks[white][square] & bitboards[p])) return 1;
+
+    //squares attacked by knights
+    if(knight_attacks[square] & ((side == white) ? bitboards[N] : bitboards[n])) return 1;
+
+    //squares attacked by bishop
+    if (get_bishop_attacks(square,occupancies[both]) & ((side == white) ? bitboards[B] : bitboards[b])) return 1;
+
+    //squares attacked by rook
+    if (get_rook_attacks(square,occupancies[both]) & ((side == white) ? bitboards[R] : bitboards[r])) return 1;
+
+    //squares attacked by queen
+    if (get_queen_attacks(square,occupancies[both]) & ((side == white) ? bitboards[Q] : bitboards[q])) return 1;
+
+    //squares attacked by king
+    if(king_attacks[square] & ((side == white) ? bitboards[K] : bitboards[k])) return 1;
+
+    //by deafult fasle
+    return 0;
+
+}
+
+// print attacked squares
+
+void print_attacked_squares(int side){
+    printf("\n");
+    for(int rank = 0; rank < 8; rank++){
+        for(int file = 0; file < 8; file ++){
+
+            int square = rank * 8 + file;
+            if(!file)
+                printf("   %d ",8 - rank);
+
+            printf(" %d",is_square_attacked(square, side)? 1 : 0);
+        }
+        printf("\n");
+    }
+    printf("\n      a b c d e f g h\n\n");
+}
 
 /*********************************\ 
  
@@ -909,62 +1112,10 @@ static inline U64 get_rook_attacks(int square, U64 occupancy)
 int main(){
     //init all
     init_all();
-
-
-    set_bit(bitboards[P], a2);
-    set_bit(bitboards[P], b2);
-    set_bit(bitboards[P], c2);
-    set_bit(bitboards[P], d2);
-    set_bit(bitboards[P], e2);
-    set_bit(bitboards[P], f2);
-    set_bit(bitboards[P], g2);
-    set_bit(bitboards[P], h2);
-
-
-    set_bit(bitboards[N], b1);
-    set_bit(bitboards[N], g1);
-
-    set_bit(bitboards[B], c1);
-    set_bit(bitboards[B], f1);
-
-    set_bit(bitboards[R], a1);
-    set_bit(bitboards[R], h1);
-
-    set_bit(bitboards[K], e1);
-    set_bit(bitboards[Q], d1);
-
-
-
-//set black
-    set_bit(bitboards[p], a7);
-    set_bit(bitboards[p], b7);
-    set_bit(bitboards[p], c7);
-    set_bit(bitboards[p], d7);
-    set_bit(bitboards[p], e7);
-    set_bit(bitboards[p], f7);
-    set_bit(bitboards[p], g7);
-    set_bit(bitboards[p], h7);
-
-
-    set_bit(bitboards[n], b8);
-    set_bit(bitboards[n], g8);
-
-    set_bit(bitboards[b], c8);
-    set_bit(bitboards[b], f8);
-
-    set_bit(bitboards[r], a8);
-    set_bit(bitboards[r], h8);
-
-    set_bit(bitboards[k], e8);
-    set_bit(bitboards[q], d8);
-    //print_bitboard(bitboards[P]);
-
+    parse_fen("8/8/8/8/3R4/8/8/8 w - -");
+    //parse_fen(tricky_position);
     print_board();
-
-
-    for(int piece = P; piece <= k; piece++){
-        print_bitboard(bitboards[piece]);
-    }
+    print_attacked_squares(white);
+    print_attacked_squares(black);
     return 0;
-
 }
