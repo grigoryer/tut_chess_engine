@@ -749,7 +749,6 @@ U64 rook_attacks_on_the_fly(int square, U64 block){
     return attacks;
 }
 
-
 //init leaper pieces attacks
 void init_leapers_attacks(){
     //loop over 64 boards squares
@@ -817,7 +816,6 @@ unsigned int get_random_U32number(){
 }
 
 //generate 64 bit pseudo legal numbers function
-
 U64 get_random_U64number(){
     //define 4 random numbers
 
@@ -837,8 +835,7 @@ U64 generate_magic_number(){
 }
 
  //find apporpriate magic number
-
- U64 find_magic_number(int square, int relevant_bits, int bishop){
+U64 find_magic_number(int square, int relevant_bits, int bishop){
     // init occupancy
     U64 occupancies[4096];
 
@@ -917,7 +914,6 @@ void init_magic_numbers()
         bishop_magic_numbers[square] = find_magic_number(square, bishop_relevant_bits[square], bishop);
 }
 
-
 // init slider piece's attack tables
 void init_sliders_attacks(int bishop)
 {
@@ -994,7 +990,7 @@ static inline U64 get_rook_attacks(int square, U64 occupancy)
     return rook_attacks[square][occupancy];
 }
 
-
+//get queen attacks
 static inline U64 get_queen_attacks(int square, U64 occupancy)
 {
 
@@ -1023,9 +1019,7 @@ static inline U64 get_queen_attacks(int square, U64 occupancy)
     return queen_attacks;
 }
 
-
 //is square attacked?!
-
 static inline int is_square_attacked(int square, int side){
 
     //squqres attacked by white pawn
@@ -1054,7 +1048,6 @@ static inline int is_square_attacked(int square, int side){
 }
 
 // print attacked squares
-
 void print_attacked_squares(int side){
     printf("\n");
     for(int rank = 0; rank < 8; rank++){
@@ -1070,8 +1063,6 @@ void print_attacked_squares(int side){
     }
     printf("\n      a b c d e f g h\n\n");
 }
-
-
 
 static inline void generate_moves(){
     int source_square; int target_square;
@@ -1404,12 +1395,81 @@ static inline void generate_moves(){
  ==================================
  \*********************************/ 
 
+/*
+          binary move bits                               hexidecimal constants
+    
+    0000 0000 0000 0000 0011 1111    source square       0x3f
+    0000 0000 0000 1111 1100 0000    target square       0xfc0
+    0000 0000 1111 0000 0000 0000    piece               0xf000
+    0000 1111 0000 0000 0000 0000    promoted piece      0xf0000
+    0001 0000 0000 0000 0000 0000    capture flag        0x100000
+    0010 0000 0000 0000 0000 0000    double push flag    0x200000
+    0100 0000 0000 0000 0000 0000    enpassant flag      0x400000
+    1000 0000 0000 0000 0000 0000    castling flag       0x800000
+*/
+
+#define encode_move(source, target, piece, promoted, capture, double, enpassant, castling) \
+    (source) |          \
+    (target << 6) |     \
+    (piece << 12) |     \
+    (promoted << 16) |  \
+    (capture << 20) |   \
+    (double << 21) |    \
+    (enpassant << 22) | \
+    (castling << 23)    \
+    
+// extract source square
+#define get_move_source(move) (move & 0x3f)
+
+// extract target square
+#define get_move_target(move) ((move & 0xfc0) >> 6)
+
+// extract piece
+#define get_move_piece(move) ((move & 0xf000) >> 12)
+
+// extract promoted piece
+#define get_move_promoted(move) ((move & 0xf0000) >> 16)
+
+// extract capture flag
+#define get_move_capture(move) (move & 0x100000)
+
+// extract double pawn push flag
+#define get_move_double(move) (move & 0x200000)
+
+// extract enpassant flag
+#define get_move_enpassant(move) (move & 0x400000)
+
+// extract castling flag
+#define get_move_castling(move) (move & 0x800000)
+
+
 int main(){
     //init all
     init_all();
     //parse_fen("r3k2r/p11pqpb1/bn2pnp1/2pPN3/1p2P3/2N2Q1p/PPr2PPP/R3K2R w KQkq - 0 1 ");
     parse_fen(tricky_position);
     print_board();
-    generate_moves();
+
+
+
+    int move = encode_move(d7, e8, P, Q, 1, 0, 0, 0);
+    
+    // exract move items
+    int source_square = get_move_source(move);
+    int target_square = get_move_target(move);
+    int piece = get_move_piece(move);
+    int promoted_piece = get_move_promoted(move);
+    
+    // print move items
+    printf("source square: %s\n", square_to_coordinates[source_square]);
+    printf("target square: %s\n", square_to_coordinates[target_square]);
+    printf("piece: %c\n", ascii_pieces[piece]);
+    printf("piece: %c\n", ascii_pieces[promoted_piece]);
+    printf("capture flag: %d\n", get_move_capture(move) ? 1 : 0);
+    printf("double pawn push flag: %d\n", get_move_double(move) ? 1 : 0);
+    printf("enpassant flag: %d\n", get_move_enpassant(move) ? 1 : 0);
+    printf("castling flag: %d\n", get_move_castling(move) ? 1 : 0);
+    
+
     return 0;
 }
